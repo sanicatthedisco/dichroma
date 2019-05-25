@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    float dx, ddx, speed;
+    float dx, ddx, speed, maxdx;
     float friction;
     private Rigidbody2D rb;
 
@@ -13,15 +13,35 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        friction = 5;
-        speed = 10;
+        friction = 3;
+        speed = 8;
+        maxdx = 12;
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
-        dx = Input.GetAxis("Horizontal");
-        ddx += dx;
+        ddx = Input.GetAxis("Horizontal") * speed;
+        dx += ddx;
+
+        if (dx > 0) {
+            dx -= friction;
+            if (dx < 0) {
+                dx = 0;
+            }
+            if (dx > maxdx) {
+                dx = maxdx;
+            }
+        } else if (dx < 0) {
+            dx += friction;
+            if (dx > 0) {
+                dx = 0;
+            }
+            if (dx < -maxdx)
+            {
+                dx = -maxdx;
+            }
+        }
 
         Vector2 movement = new Vector2(dx, rb.velocity.y);
 
