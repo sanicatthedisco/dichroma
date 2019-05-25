@@ -3,36 +3,39 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [ExecuteInEditMode]
-public class ParallaxLayer : MonoBehaviour
+public class ParallaxBackground : MonoBehaviour
 {
-    public float parallaxFactor;
-    public void Move(float delta)
-    {
-        Vector3 newPos = transform.localPosition;
-        newPos.x -= delta * parallaxFactor;
-        transform.localPosition = newPos;
-    }
-}
-[ExecuteInEditMode]
-public class ParallaxCamera : MonoBehaviour
-{
-    public delegate void ParallaxCameraDelegate(float deltaMovement);
-    public ParallaxCameraDelegate onCameraTranslate;
-    private float oldPosition;
+    public ParallaxCamera parallaxCamera;
+    List<ParallaxLayer> parallaxLayers = new List<ParallaxLayer>();
+
     void Start()
     {
-        oldPosition = transform.position.x;
+        if (parallaxCamera == null)
+            parallaxCamera = Camera.main.GetComponent<ParallaxCamera>();
+        if (parallaxCamera != null)
+            parallaxCamera.onCameraTranslate += Move;
+        SetLayers();
     }
-    void Update()
+
+    void SetLayers()
     {
-        if (transform.position.x != oldPosition)
+        parallaxLayers.Clear();
+        for (int i = 0; i < transform.childCount; i++)
         {
-            if (onCameraTranslate != null)
+            ParallaxLayer layer = transform.GetChild(i).GetComponent<ParallaxLayer>();
+
+            if (layer != null)
             {
-                float delta = oldPosition - transform.position.x;
-                onCameraTranslate(delta);
+                layer.name = "Layer-" + i;
+                parallaxLayers.Add(layer);
             }
-            oldPosition = transform.position.x;
+        }
+    }
+    void Move(float delta)
+    {
+        foreach (ParallaxLayer layer in parallaxLayers)
+        {
+            layer.Move(delta);
         }
     }
 }
